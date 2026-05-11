@@ -591,12 +591,9 @@ function BusinessDashboard() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      if (uploadedImages.length < MIN_IMAGES) {
-        throw new Error(
-          `Please upload at least ${MIN_IMAGES} images to create a post`,
-        );
-      }
-      const mainImage = uploadedImages[0].url;
+      // Images are now optional - can create post without images
+      const mainImage =
+        uploadedImages.length > 0 ? uploadedImages[0].url : null;
       const res = await apiRequest("POST", createApiUrl("/api/listings"), {
         ...data,
         type: "business",
@@ -788,14 +785,12 @@ function BusinessDashboard() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label>Images *</Label>
+                    <Label>Images (Optional)</Label>
                     <span
-                      className={`text-xs ${uploadedImages.length < MIN_IMAGES ? "text-muted-foreground" : uploadedImages.length >= MAX_IMAGES ? "text-destructive" : "text-primary"}`}
+                      className={`text-xs ${uploadedImages.length >= MAX_IMAGES ? "text-destructive" : "text-primary"}`}
                       data-testid="text-image-count"
                     >
-                      {uploadedImages.length}/{MAX_IMAGES} photos{" "}
-                      {uploadedImages.length < MIN_IMAGES &&
-                        `(min ${MIN_IMAGES})`}
+                      {uploadedImages.length}/{MAX_IMAGES} photos
                     </span>
                   </div>
                   {uploadedImages.length > 0 && (
@@ -857,8 +852,8 @@ function BusinessDashboard() {
                         <>
                           <Upload className="h-6 w-6 text-muted-foreground/50 mb-1" />
                           <span className="text-xs text-muted-foreground">
-                            Upload {MIN_IMAGES}-{MAX_IMAGES} photos to showcase
-                            your products
+                            Upload up to {MAX_IMAGES} photos to showcase your
+                            products (optional)
                           </span>
                         </>
                       )}
@@ -1209,12 +1204,9 @@ function SkilledWorkerDashboard() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      if (uploadedImages.length < MIN_IMAGES) {
-        throw new Error(
-          `Please upload at least ${MIN_IMAGES} images to create a service`,
-        );
-      }
-      const mainImage = uploadedImages[0].url;
+      // Images are now optional - can create service without images
+      const mainImage =
+        uploadedImages.length > 0 ? uploadedImages[0].url : null;
       const res = await apiRequest("POST", "/api/listings", {
         ...data,
         type: "service",
@@ -1402,14 +1394,12 @@ function SkilledWorkerDashboard() {
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between gap-2">
-                    <Label>Photos *</Label>
+                    <Label>Photos (Optional)</Label>
                     <span
-                      className={`text-xs ${uploadedImages.length < MIN_IMAGES ? "text-muted-foreground" : uploadedImages.length >= MAX_IMAGES ? "text-destructive" : "text-primary"}`}
+                      className={`text-xs ${uploadedImages.length >= MAX_IMAGES ? "text-destructive" : "text-primary"}`}
                       data-testid="text-image-count"
                     >
-                      {uploadedImages.length}/{MAX_IMAGES} photos{" "}
-                      {uploadedImages.length < MIN_IMAGES &&
-                        `(min ${MIN_IMAGES})`}
+                      {uploadedImages.length}/{MAX_IMAGES} photos
                     </span>
                   </div>
                   {uploadedImages.length > 0 && (
@@ -1471,8 +1461,8 @@ function SkilledWorkerDashboard() {
                         <>
                           <Upload className="h-6 w-6 text-muted-foreground/50 mb-1" />
                           <span className="text-xs text-muted-foreground">
-                            Upload {MIN_IMAGES}-{MAX_IMAGES} photos to showcase
-                            your work
+                            Upload up to {MAX_IMAGES} photos to showcase your
+                            work (optional)
                           </span>
                         </>
                       )}
