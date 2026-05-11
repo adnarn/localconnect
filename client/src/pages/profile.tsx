@@ -504,7 +504,11 @@ export default function Profile() {
               <Avatar className="h-24 w-24">
                 {profileUser.profileImageUrl ? (
                   <AvatarImage
-                    src={profileUser.profileImageUrl}
+                    src={
+                      profileUser.profileImageUrl.startsWith("http")
+                        ? profileUser.profileImageUrl
+                        : `${API_BASE_URL}${profileUser.profileImageUrl}`
+                    }
                     alt={fullName}
                   />
                 ) : null}
