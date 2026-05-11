@@ -41,7 +41,17 @@ async function buildAll() {
   await cp("client/dist", "dist/public", { recursive: true });
 
   console.log("building server...");
-  const pkg = JSON.parse(await readFile("package.json", "utf-8"));
+  let pkg;
+  try {
+    pkg = JSON.parse(await readFile("package.json", "utf-8"));
+  } catch (error) {
+    console.error("Error parsing package.json:", error);
+    // Fallback package object
+    pkg = {
+      dependencies: {},
+      devDependencies: {},
+    };
+  }
   const allDeps = [
     ...Object.keys(pkg.dependencies || {}),
     ...Object.keys(pkg.devDependencies || {}),
