@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from "react";
-import { createApiUrl } from "@/lib/api";
+import { createApiUrl, API_BASE_URL } from "@/lib/api";
 import { useRoute, Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -139,7 +139,12 @@ const SKILL_CATEGORIES = [
 ];
 
 const MAX_IMAGE_SIZE_MB = 5;
-const ALLOWED_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp", "image/jpg"];
+const ALLOWED_IMAGE_TYPES = [
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/jpg",
+];
 
 // ============== VALIDATION SCHEMA ==============
 const editProfileSchema = z.object({
@@ -172,12 +177,20 @@ const formatWhatsAppNumber = (phone: string): string => {
   return "234" + cleaned;
 };
 
-const validateImageFile = (file: File): { isValid: boolean; error?: string } => {
+const validateImageFile = (
+  file: File,
+): { isValid: boolean; error?: string } => {
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
-    return { isValid: false, error: "Only JPEG, PNG, and WebP images are allowed" };
+    return {
+      isValid: false,
+      error: "Only JPEG, PNG, and WebP images are allowed",
+    };
   }
   if (file.size > MAX_IMAGE_SIZE_MB * 1024 * 1024) {
-    return { isValid: false, error: `Image must be less than ${MAX_IMAGE_SIZE_MB}MB` };
+    return {
+      isValid: false,
+      error: `Image must be less than ${MAX_IMAGE_SIZE_MB}MB`,
+    };
   }
   return { isValid: true };
 };
@@ -192,7 +205,9 @@ export default function Profile() {
   const [uploadingDP, setUploadingDP] = useState(false);
   const [selectedGalleryCaption, setSelectedGalleryCaption] = useState("");
   const [showCaptionDialog, setShowCaptionDialog] = useState(false);
-  const [pendingGalleryFile, setPendingGalleryFile] = useState<File | null>(null);
+  const [pendingGalleryFile, setPendingGalleryFile] = useState<File | null>(
+    null,
+  );
   const galleryInputRef = useRef<HTMLInputElement>(null);
   const dpInputRef = useRef<HTMLInputElement>(null);
 
@@ -222,10 +237,15 @@ export default function Profile() {
     enabled: !!params?.id && canViewProfile,
   });
 
-  const { data: galleryImages, isLoading: isLoadingGallery } = useQuery<GalleryImage[]>({
+  const { data: galleryImages, isLoading: isLoadingGallery } = useQuery<
+    GalleryImage[]
+  >({
     queryKey: ["/api/gallery", params?.id],
-    enabled: !!params?.id && canViewProfile && 
-             (profileUser?.role === "skilled_worker" || profileUser?.role === "business_owner"),
+    enabled:
+      !!params?.id &&
+      canViewProfile &&
+      (profileUser?.role === "skilled_worker" ||
+        profileUser?.role === "business_owner"),
   });
 
   // Mutations
@@ -253,7 +273,7 @@ export default function Profile() {
     mutationFn: async ({ file, caption }: { file: File; caption?: string }) => {
       const formData = new FormData();
       formData.append("image", file);
-      
+
       const token = localStorage.getItem("authToken");
       const uploadRes = await fetch(createApiUrl("/api/upload"), {
         method: "POST",
@@ -261,13 +281,13 @@ export default function Profile() {
         credentials: "include",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      
+
       if (!uploadRes.ok) throw new Error("Upload failed");
       const { url } = await uploadRes.json();
-      
-      const res = await apiRequest("POST", "/api/gallery", { 
+
+      const res = await apiRequest("POST", "/api/gallery", {
         imageUrl: url,
-        caption: caption || ""
+        caption: caption || "",
       });
       return res.json();
     },
@@ -311,7 +331,7 @@ export default function Profile() {
     mutationFn: async (file: File) => {
       const formData = new FormData();
       formData.append("image", file);
-      
+
       const token = localStorage.getItem("authToken");
       const uploadRes = await fetch(createApiUrl("/api/upload"), {
         method: "POST",
@@ -319,10 +339,10 @@ export default function Profile() {
         credentials: "include",
         headers: token ? { Authorization: `Bearer ${token}` } : {},
       });
-      
+
       if (!uploadRes.ok) throw new Error("Upload failed");
       const { url } = await uploadRes.json();
-      
+
       const res = await apiRequest("PATCH", "/api/auth/profile", {
         profileImageUrl: url,
       });
@@ -358,7 +378,7 @@ export default function Profile() {
         e.target.value = "";
         return;
       }
-      
+
       setPendingGalleryFile(file);
       setShowCaptionDialog(true);
     }
@@ -388,7 +408,7 @@ export default function Profile() {
         e.target.value = "";
         return;
       }
-      
+
       setUploadingDP(true);
       uploadDPMutation.mutate(file);
     }
@@ -435,7 +455,8 @@ export default function Profile() {
           </div>
           <h2 className="text-2xl font-semibold">Private Profile</h2>
           <p className="text-muted-foreground max-w-md">
-            This profile is private. Only the profile owner can view their information.
+            This profile is private. Only the profile owner can view their
+            information.
           </p>
           {!currentUser && (
             <Link href="/auth/login">
@@ -447,18 +468,30 @@ export default function Profile() {
     );
   }
 
-  const initials = (profileUser.firstName?.[0] || "") + (profileUser.lastName?.[0] || "") || "U";
-  const fullName = [profileUser.firstName, profileUser.lastName].filter(Boolean).join(" ");
+  const initials =
+    (profileUser.firstName?.[0] || "") + (profileUser.lastName?.[0] || "") ||
+    "U";
+  const fullName = [profileUser.firstName, profileUser.lastName]
+    .filter(Boolean)
+    .join(" ");
   const avgRating = reviews?.length
     ? reviews.reduce((s: number, r: Review) => s + r.rating, 0) / reviews.length
     : 0;
-  const isProvider = profileUser.role === "skilled_worker" || profileUser.role === "business_owner";
-  const isLoading = isLoadingUser || isLoadingListings || isLoadingReviews || isLoadingGallery;
+  const isProvider =
+    profileUser.role === "skilled_worker" ||
+    profileUser.role === "business_owner";
+  const isLoading =
+    isLoadingUser || isLoadingListings || isLoadingReviews || isLoadingGallery;
 
   return (
     <div className="max-w-4xl mx-auto p-4 py-8">
       <Link href="/">
-        <Button variant="ghost" size="sm" className="mb-4" data-testid="button-back">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="mb-4"
+          data-testid="button-back"
+        >
           <ArrowLeft className="h-4 w-4 mr-1" /> Back
         </Button>
       </Link>
@@ -470,7 +503,10 @@ export default function Profile() {
             <div className="relative group shrink-0">
               <Avatar className="h-24 w-24">
                 {profileUser.profileImageUrl ? (
-                  <AvatarImage src={profileUser.profileImageUrl} alt={fullName} />
+                  <AvatarImage
+                    src={profileUser.profileImageUrl}
+                    alt={fullName}
+                  />
                 ) : null}
                 <AvatarFallback className="bg-primary/10 text-2xl font-semibold">
                   {initials}
@@ -497,57 +533,83 @@ export default function Profile() {
 
             <div className="flex-1 min-w-0 text-center sm:text-left">
               <div className="flex items-center justify-center sm:justify-start gap-2">
-                <h1 className="text-2xl font-bold" data-testid="text-profile-name">
+                <h1
+                  className="text-2xl font-bold"
+                  data-testid="text-profile-name"
+                >
                   {fullName}
                 </h1>
                 {profileUser.isPrivate && (
-                  <Lock className="h-4 w-4 text-muted-foreground" title="Private profile" />
+                  <Lock
+                    className="h-4 w-4 text-muted-foreground"
+                    title="Private profile"
+                  />
                 )}
               </div>
-              
+
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-1.5">
                 {profileUser.role && (
-                  <Badge variant="secondary" className="capitalize text-xs" data-testid="badge-role">
+                  <Badge
+                    variant="secondary"
+                    className="capitalize text-xs"
+                    data-testid="badge-role"
+                  >
                     {profileUser.role.replace("_", " ")}
                   </Badge>
                 )}
                 {profileUser.skills && profileUser.skills.length > 0 && (
                   <Badge variant="outline" className="text-xs">
-                    {profileUser.skills.length} skill{profileUser.skills.length !== 1 ? "s" : ""}
+                    {profileUser.skills.length} skill
+                    {profileUser.skills.length !== 1 ? "s" : ""}
                   </Badge>
                 )}
               </div>
 
               <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 mt-3 text-sm text-muted-foreground">
                 {profileUser.location && (
-                  <span className="flex items-center gap-1" data-testid="text-profile-location">
+                  <span
+                    className="flex items-center gap-1"
+                    data-testid="text-profile-location"
+                  >
                     <MapPin className="h-3.5 w-3.5" /> {profileUser.location}
                   </span>
                 )}
                 {isOwnProfile && profileUser.phone && (
-                  <span className="flex items-center gap-1" data-testid="text-profile-phone">
+                  <span
+                    className="flex items-center gap-1"
+                    data-testid="text-profile-phone"
+                  >
                     <Phone className="h-3.5 w-3.5" /> {profileUser.phone}
                   </span>
                 )}
                 {isOwnProfile && profileUser.email && (
-                  <span className="flex items-center gap-1" data-testid="text-profile-email">
+                  <span
+                    className="flex items-center gap-1"
+                    data-testid="text-profile-email"
+                  >
                     <Mail className="h-3.5 w-3.5" /> {profileUser.email}
                   </span>
                 )}
                 {profileUser.createdAt && (
                   <span className="flex items-center gap-1 text-xs">
-                    <Globe className="h-3.5 w-3.5" /> 
+                    <Globe className="h-3.5 w-3.5" />
                     Member since {new Date(profileUser.createdAt).getFullYear()}
                   </span>
                 )}
               </div>
 
               {reviews && reviews.length > 0 && (
-                <div className="flex items-center justify-center sm:justify-start gap-2 mt-3" data-testid="rating-summary">
+                <div
+                  className="flex items-center justify-center sm:justify-start gap-2 mt-3"
+                  data-testid="rating-summary"
+                >
                   <StarRating rating={avgRating} />
-                  <span className="text-sm font-medium">{avgRating.toFixed(1)}</span>
+                  <span className="text-sm font-medium">
+                    {avgRating.toFixed(1)}
+                  </span>
                   <span className="text-sm text-muted-foreground">
-                    ({reviews.length} {reviews.length === 1 ? "review" : "reviews"})
+                    ({reviews.length}{" "}
+                    {reviews.length === 1 ? "review" : "reviews"})
                   </span>
                 </div>
               )}
@@ -556,21 +618,28 @@ export default function Profile() {
             <div className="flex flex-col gap-2 shrink-0">
               {isOwnProfile && (
                 <>
-                  <Button variant="outline" onClick={() => setEditOpen(true)} data-testid="button-edit-profile">
+                  <Button
+                    variant="outline"
+                    onClick={() => setEditOpen(true)}
+                    data-testid="button-edit-profile"
+                  >
                     <Pencil className="h-4 w-4 mr-1" /> Edit Profile
                   </Button>
                 </>
               )}
               {!isOwnProfile && profileUser.phone && (
                 <div className="flex gap-2">
-                  <a href={`tel:${profileUser.phone}`} data-testid="link-call-user">
+                  <a
+                    href={`tel:${profileUser.phone}`}
+                    data-testid="link-call-user"
+                  >
                     <Button variant="outline">
                       <Phone className="h-4 w-4 mr-1" /> Call
                     </Button>
                   </a>
                   <a
                     href={`https://wa.me/${formatWhatsAppNumber(profileUser.phone)}?text=${encodeURIComponent(
-                      `Hi, I found your profile on LocalHub.`
+                      `Hi, I found your profile on LocalHub.`,
                     )}`}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -594,7 +663,10 @@ export default function Profile() {
             <CardTitle className="text-base">About</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-sm text-muted-foreground leading-relaxed" data-testid="text-profile-bio">
+            <p
+              className="text-sm text-muted-foreground leading-relaxed"
+              data-testid="text-profile-bio"
+            >
               {profileUser.bio}
             </p>
           </CardContent>
@@ -602,29 +674,33 @@ export default function Profile() {
       )}
 
       {/* Skills Section for Skilled Workers */}
-      {profileUser.role === "skilled_worker" && profileUser.skills && profileUser.skills.length > 0 && (
-        <Card className="mb-6">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-base">Skills & Expertise</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {profileUser.skills.map((skill, index) => (
-                <Badge key={index} variant="secondary" className="text-sm">
-                  {skill}
-                </Badge>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {profileUser.role === "skilled_worker" &&
+        profileUser.skills &&
+        profileUser.skills.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-base">Skills & Expertise</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-2">
+                {profileUser.skills.map((skill, index) => (
+                  <Badge key={index} variant="secondary" className="text-sm">
+                    {skill}
+                  </Badge>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
       {/* Gallery Section */}
       {(isProvider || isOwnProfile) && (
         <Card className="mb-6" data-testid="card-gallery">
           <CardHeader className="flex flex-row items-center justify-between gap-2 pb-3">
             <CardTitle className="text-base">
-              {profileUser.role === "business_owner" ? "Business Gallery" : "Work Gallery"}
+              {profileUser.role === "business_owner"
+                ? "Business Gallery"
+                : "Work Gallery"}
             </CardTitle>
             {isOwnProfile && (
               <Button
@@ -634,7 +710,8 @@ export default function Profile() {
                 disabled={uploadingGallery}
                 data-testid="button-add-gallery-image"
               >
-                <Plus className="h-4 w-4 mr-1" /> {uploadingGallery ? "Uploading..." : "Add Image"}
+                <Plus className="h-4 w-4 mr-1" />{" "}
+                {uploadingGallery ? "Uploading..." : "Add Image"}
               </Button>
             )}
             <input
@@ -655,7 +732,11 @@ export default function Profile() {
                     data-testid={`gallery-image-${img.id}`}
                   >
                     <img
-                      src={img.imageUrl}
+                      src={
+                        img.imageUrl.startsWith("http")
+                          ? img.imageUrl
+                          : `${API_BASE_URL}${img.imageUrl}`
+                      }
                       alt={img.caption || "Work sample"}
                       className="w-full aspect-square object-cover"
                       loading="lazy"
@@ -707,14 +788,18 @@ export default function Profile() {
         <Card className="mb-6" data-testid="card-listings">
           <CardHeader className="pb-3">
             <CardTitle className="text-base">
-              {profileUser.role === "business_owner" ? "Posts" : "Services"} ({listings.length})
+              {profileUser.role === "business_owner" ? "Posts" : "Services"} (
+              {listings.length})
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               {listings.map((l: Listing) => (
                 <Link key={l.id} href={`/listing/${l.id}`}>
-                  <Card className="hover:shadow-lg transition-shadow cursor-pointer" data-testid={`card-profile-listing-${l.id}`}>
+                  <Card
+                    className="hover:shadow-lg transition-shadow cursor-pointer"
+                    data-testid={`card-profile-listing-${l.id}`}
+                  >
                     <CardContent className="p-4">
                       <div className="flex items-start gap-3">
                         {l.image ? (
@@ -731,7 +816,10 @@ export default function Profile() {
                         )}
                         <div className="min-w-0 flex-1">
                           <h3 className="font-medium truncate">{l.title}</h3>
-                          <Badge variant="secondary" className="capitalize text-xs mt-1">
+                          <Badge
+                            variant="secondary"
+                            className="capitalize text-xs mt-1"
+                          >
                             {l.category}
                           </Badge>
                           {l.price && (
@@ -765,16 +853,26 @@ export default function Profile() {
                   <div className="flex items-start gap-3">
                     <Avatar className="h-8 w-8 shrink-0">
                       {r.reviewer?.profileImageUrl ? (
-                        <AvatarImage src={r.reviewer.profileImageUrl} />
+                        <AvatarImage
+                          src={
+                            r.reviewer.profileImageUrl.startsWith("http")
+                              ? r.reviewer.profileImageUrl
+                              : `${API_BASE_URL}${r.reviewer.profileImageUrl}`
+                          }
+                          alt={`${r.reviewer.firstName} ${r.reviewer.lastName}`}
+                        />
                       ) : null}
                       <AvatarFallback className="text-xs">
-                        {(r.reviewer?.firstName?.[0] || "") + (r.reviewer?.lastName?.[0] || "")}
+                        {(r.reviewer?.firstName?.[0] || "") +
+                          (r.reviewer?.lastName?.[0] || "")}
                       </AvatarFallback>
                     </Avatar>
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="text-sm font-medium">
-                          {[r.reviewer?.firstName, r.reviewer?.lastName].filter(Boolean).join(" ") || "Anonymous"}
+                          {[r.reviewer?.firstName, r.reviewer?.lastName]
+                            .filter(Boolean)
+                            .join(" ") || "Anonymous"}
                         </span>
                         <StarRating rating={r.rating} size="sm" />
                         {r.createdAt && (
@@ -783,7 +881,9 @@ export default function Profile() {
                           </span>
                         )}
                       </div>
-                      <p className="text-sm text-muted-foreground mt-1">{r.comment}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {r.comment}
+                      </p>
                     </div>
                   </div>
                   {index < reviews.length - 1 && <Separator className="mt-4" />}
@@ -819,10 +919,16 @@ export default function Profile() {
               rows={3}
             />
             <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setShowCaptionDialog(false)}>
+              <Button
+                variant="outline"
+                onClick={() => setShowCaptionDialog(false)}
+              >
                 Cancel
               </Button>
-              <Button onClick={handleConfirmGalleryUpload} disabled={uploadingGallery}>
+              <Button
+                onClick={handleConfirmGalleryUpload}
+                disabled={uploadingGallery}
+              >
                 {uploadingGallery ? "Uploading..." : "Upload Image"}
               </Button>
             </div>
@@ -847,7 +953,9 @@ function EditProfileDialog({
   onSubmit: (data: EditProfileData) => void;
   isPending: boolean;
 }) {
-  const [selectedSkills, setSelectedSkills] = useState<string[]>(user.skills || []);
+  const [selectedSkills, setSelectedSkills] = useState<string[]>(
+    user.skills || [],
+  );
 
   const form = useForm<EditProfileData>({
     resolver: zodResolver(editProfileSchema),
@@ -942,7 +1050,10 @@ function EditProfileDialog({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Account Type</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
                         <SelectTrigger data-testid="select-edit-role">
                           <SelectValue placeholder="Select account type" />
@@ -950,8 +1061,12 @@ function EditProfileDialog({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="customer">Customer</SelectItem>
-                        <SelectItem value="business_owner">Business Owner</SelectItem>
-                        <SelectItem value="skilled_worker">Skilled Worker</SelectItem>
+                        <SelectItem value="business_owner">
+                          Business Owner
+                        </SelectItem>
+                        <SelectItem value="skilled_worker">
+                          Skilled Worker
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
@@ -1033,7 +1148,11 @@ function EditProfileDialog({
                     <div className="space-y-3">
                       <div className="flex flex-wrap gap-2">
                         {selectedSkills.map((skill) => (
-                          <Badge key={skill} variant="secondary" className="gap-1">
+                          <Badge
+                            key={skill}
+                            variant="secondary"
+                            className="gap-1"
+                          >
                             {skill}
                             <button
                               type="button"
@@ -1050,7 +1169,9 @@ function EditProfileDialog({
                           <SelectValue placeholder="Add a skill..." />
                         </SelectTrigger>
                         <SelectContent>
-                          {SKILL_CATEGORIES.filter((s) => !selectedSkills.includes(s)).map((skill) => (
+                          {SKILL_CATEGORIES.filter(
+                            (s) => !selectedSkills.includes(s),
+                          ).map((skill) => (
                             <SelectItem key={skill} value={skill}>
                               {skill}
                             </SelectItem>
@@ -1109,7 +1230,11 @@ function EditProfileDialog({
               >
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending} data-testid="button-save-profile">
+              <Button
+                type="submit"
+                disabled={isPending}
+                data-testid="button-save-profile"
+              >
                 {isPending ? "Saving..." : "Save Changes"}
               </Button>
             </div>

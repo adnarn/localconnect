@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { createApiUrl } from "@/lib/api";
+import { createApiUrl, API_BASE_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -263,7 +263,11 @@ function ServiceResultCard({ listing }: { listing: any }) {
         {listing.image ? (
           <div className="relative overflow-hidden rounded-t-md">
             <img
-              src={listing.image}
+              src={
+                listing.image.startsWith("http")
+                  ? listing.image
+                  : `${API_BASE_URL}${listing.image}`
+              }
               alt={listing.title}
               className="h-40 w-full object-cover"
               data-testid={`img-listing-${listing.id}`}
@@ -398,7 +402,11 @@ function BusinessResultCard({ listing }: { listing: any }) {
         <div className="relative overflow-hidden rounded-t-md">
           {listing.image ? (
             <img
-              src={listing.image}
+              src={
+                listing.image.startsWith("http")
+                  ? listing.image
+                  : `${API_BASE_URL}${listing.image}`
+              }
               alt={listing.title}
               className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               data-testid={`img-listing-${listing.id}`}
