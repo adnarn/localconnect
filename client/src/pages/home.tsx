@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { API_BASE_URL } from "@/lib/api";
 import { useAuth } from "@/lib/auth";
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
@@ -369,7 +370,11 @@ function ServiceCard({ listing }: { listing: ListingWithProvider }) {
         {listing.image ? (
           <div className="relative overflow-hidden rounded-t-md">
             <img
-              src={listing.image}
+              src={
+                listing.image.startsWith("http")
+                  ? listing.image
+                  : `${API_BASE_URL}${listing.image}`
+              }
               alt={listing.title}
               className="h-40 w-full object-cover"
               data-testid={`img-listing-${listing.id}`}
