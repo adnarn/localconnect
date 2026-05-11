@@ -50,6 +50,16 @@ import { SiWhatsapp } from "react-icons/si";
 import { Link, useLocation } from "wouter";
 import type { Listing, Review } from "@shared/schema";
 
+// Helper function to get the correct image URL
+const getImageUrl = (url: string | undefined | null): string => {
+  if (!url) return "";
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+  const cleanUrl = url.startsWith("/") ? url : `/${url}`;
+  return `${API_BASE_URL}${cleanUrl}`;
+};
+
 const categoryOptions = [
   "Plumbing",
   "Cleaning",
@@ -263,14 +273,13 @@ function ServiceResultCard({ listing }: { listing: any }) {
         {listing.image ? (
           <div className="relative overflow-hidden rounded-t-md">
             <img
-              src={
-                listing.image.startsWith("http")
-                  ? listing.image
-                  : `${API_BASE_URL}${listing.image}`
-              }
+              src={getImageUrl(listing.image)}
               alt={listing.title}
               className="h-40 w-full object-cover"
               data-testid={`img-listing-${listing.id}`}
+              onError={(e) => {
+                e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/64748b?text=No+Image";
+              }}
             />
             {imageCount > 1 && (
               <div
@@ -402,14 +411,13 @@ function BusinessResultCard({ listing }: { listing: any }) {
         <div className="relative overflow-hidden rounded-t-md">
           {listing.image ? (
             <img
-              src={
-                listing.image.startsWith("http")
-                  ? listing.image
-                  : `${API_BASE_URL}${listing.image}`
-              }
+              src={getImageUrl(listing.image)}
               alt={listing.title}
               className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
               data-testid={`img-listing-${listing.id}`}
+              onError={(e) => {
+                e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/64748b?text=No+Image";
+              }}
             />
           ) : (
             <div className="h-48 w-full bg-muted flex items-center justify-center">
@@ -599,7 +607,6 @@ function BusinessDashboard() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      // Images are now optional - can create post without images
       const mainImage =
         uploadedImages.length > 0 ? uploadedImages[0].url : null;
       const res = await apiRequest("POST", createApiUrl("/api/listings"), {
@@ -670,7 +677,7 @@ function BusinessDashboard() {
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14 shrink-0">
             {user?.profileImageUrl ? (
-              <AvatarImage src={user.profileImageUrl} alt={businessName} />
+              <AvatarImage src={getImageUrl(user.profileImageUrl)} alt={businessName} />
             ) : null}
             <AvatarFallback className="bg-primary/10 text-lg font-semibold">
               {initials}
@@ -994,9 +1001,12 @@ function BusinessDashboard() {
                     {listing.image ? (
                       <div className="relative overflow-hidden rounded-t-md">
                         <img
-                          src={listing.image}
+                          src={getImageUrl(listing.image)}
                           alt={listing.title}
                           className="h-40 w-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/64748b?text=No+Image";
+                          }}
                         />
                         <Badge
                           variant="secondary"
@@ -1212,7 +1222,6 @@ function SkilledWorkerDashboard() {
 
   const createMutation = useMutation({
     mutationFn: async (data: any) => {
-      // Images are now optional - can create service without images
       const mainImage =
         uploadedImages.length > 0 ? uploadedImages[0].url : null;
       const res = await apiRequest("POST", "/api/listings", {
@@ -1279,7 +1288,7 @@ function SkilledWorkerDashboard() {
         <div className="flex items-center gap-4">
           <Avatar className="h-14 w-14 shrink-0">
             {user?.profileImageUrl ? (
-              <AvatarImage src={user.profileImageUrl} alt={workerName} />
+              <AvatarImage src={getImageUrl(user.profileImageUrl)} alt={workerName} />
             ) : null}
             <AvatarFallback className="bg-primary/10 text-lg font-semibold">
               {initials}
@@ -1592,9 +1601,12 @@ function SkilledWorkerDashboard() {
                     {listing.image ? (
                       <div className="relative overflow-hidden rounded-t-md">
                         <img
-                          src={listing.image}
+                          src={getImageUrl(listing.image)}
                           alt={listing.title}
                           className="h-40 w-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/64748b?text=No+Image";
+                          }}
                         />
                         <Badge
                           variant="secondary"
@@ -1744,9 +1756,12 @@ function SkilledWorkerDashboard() {
                   data-testid={`gallery-image-${img.id}`}
                 >
                   <img
-                    src={img.imageUrl}
+                    src={getImageUrl(img.imageUrl)}
                     alt={img.caption || "Work sample"}
                     className="w-full aspect-square object-cover rounded-md"
+                    onError={(e) => {
+                      e.currentTarget.src = "https://placehold.co/600x400/e2e8f0/64748b?text=No+Image";
+                    }}
                   />
                   {img.caption && (
                     <p className="text-xs text-muted-foreground mt-1 truncate">
