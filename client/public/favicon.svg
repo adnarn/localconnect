@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <g fill="#2563eb">
+    <!-- Left hand -->
+    <path d="M6 14c-1.1 0-2 .9-2 2v6c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2v-6c0-1.1-.9-2-2-2h-2v-2c0-1.1-.9-2-2-2s-2 .9-2 2v2H6z"/>
+    <!-- Right hand -->
+    <path d="M26 14c1.1 0 2 .9 2 2v6c0 1.1-.9 2-2 2h-8c-1.1 0-2 .9-2 2v-6c0-1.1.9-2 2-2h2v-2c0-1.1.9-2 2 2v2h2z"/>
+    <!-- Handshake connection -->
+    <rect x="12" y="16" width="8" height="4" rx="1" fill="#1e40af"/>
+    <!-- Fingers detail -->
+    <rect x="7" y="18" width="2" height="2" rx="0.5" fill="#1e40af"/>
+    <rect x="10" y="18" width="2" height="2" rx="0.5" fill="#1e40af"/>
+    <rect x="20" y="18" width="2" height="2" rx="0.5" fill="#1e40af"/>
+    <rect x="23" y="18" width="2" height="2" rx="0.5" fill="#1e40af"/>
+  </g>
+</svg>
