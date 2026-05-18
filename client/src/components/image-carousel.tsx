@@ -32,12 +32,15 @@ export function ImageCarousel({
 
   const hasMultiple = images.length > 1;
 
-  const goTo = useCallback((index: number) => {
-    if (isTransitioning) return;
-    setIsTransitioning(true);
-    setCurrentIndex(index);
-    setTimeout(() => setIsTransitioning(false), 350);
-  }, [isTransitioning]);
+  const goTo = useCallback(
+    (index: number) => {
+      if (isTransitioning) return;
+      setIsTransitioning(true);
+      setCurrentIndex(index);
+      setTimeout(() => setIsTransitioning(false), 350);
+    },
+    [isTransitioning],
+  );
 
   const next = useCallback(() => {
     goTo((currentIndex + 1) % images.length);
@@ -101,10 +104,17 @@ export function ImageCarousel({
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [lightboxOpen]);
 
-  const aspectClass = aspectRatio === "square" ? "aspect-square" : aspectRatio === "wide" ? "aspect-[2/1]" : "aspect-video";
+  const aspectClass =
+    aspectRatio === "square"
+      ? "aspect-square"
+      : aspectRatio === "wide"
+        ? "aspect-[2/1]"
+        : "aspect-video";
   const dragOffset = touchStart !== null ? touchDelta : 0;
 
   if (!images.length) return null;
@@ -123,8 +133,11 @@ export function ImageCarousel({
             ref={trackRef}
             className="flex h-full"
             style={{
-              transform: `translateX(calc(-${currentIndex * 100}% + ${dragOffset}px))`,
-              transition: touchStart !== null ? "none" : "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
+              transform: `translateX(calc(-${currentIndex * 100}vw + ${dragOffset}px))`,
+              transition:
+                touchStart !== null
+                  ? "none"
+                  : "transform 0.35s cubic-bezier(0.4, 0, 0.2, 1)",
               width: `${images.length * 100}%`,
             }}
           >
@@ -150,11 +163,18 @@ export function ImageCarousel({
 
           <button
             className="absolute bottom-3 right-3 flex items-center gap-1 rounded-md bg-black/50 px-2 py-1 text-white text-xs backdrop-blur-sm"
-            onClick={(e) => { e.stopPropagation(); openLightbox(currentIndex); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              openLightbox(currentIndex);
+            }}
             data-testid="button-enlarge"
           >
             <ZoomIn className="h-3 w-3" />
-            {hasMultiple && <span>{currentIndex + 1}/{images.length}</span>}
+            {hasMultiple && (
+              <span>
+                {currentIndex + 1}/{images.length}
+              </span>
+            )}
           </button>
 
           {hasMultiple && (
@@ -163,7 +183,10 @@ export function ImageCarousel({
                 variant="secondary"
                 size="icon"
                 className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/40 text-white border-0 backdrop-blur-sm"
-                onClick={(e) => { e.stopPropagation(); prev(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  prev();
+                }}
                 data-testid="button-prev-image"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -172,7 +195,10 @@ export function ImageCarousel({
                 variant="secondary"
                 size="icon"
                 className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/40 text-white border-0 backdrop-blur-sm"
-                onClick={(e) => { e.stopPropagation(); next(); }}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  next();
+                }}
                 data-testid="button-next-image"
               >
                 <ChevronRight className="h-4 w-4" />
@@ -185,7 +211,10 @@ export function ImageCarousel({
               {images.map((_, idx) => (
                 <button
                   key={idx}
-                  onClick={(e) => { e.stopPropagation(); goTo(idx); }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    goTo(idx);
+                  }}
                   className={`h-2 rounded-full transition-all duration-300 ${
                     idx === currentIndex ? "w-5 bg-white" : "w-2 bg-white/50"
                   }`}
@@ -197,7 +226,10 @@ export function ImageCarousel({
         </div>
 
         {showThumbnails && hasMultiple && (
-          <div className="flex gap-2 mt-3 overflow-x-auto pb-1" data-testid="carousel-thumbnails">
+          <div
+            className="flex gap-2 mt-3 overflow-x-auto pb-1"
+            data-testid="carousel-thumbnails"
+          >
             {images.map((src, idx) => (
               <button
                 key={idx}
@@ -209,7 +241,11 @@ export function ImageCarousel({
                 }`}
                 data-testid={`button-thumbnail-${idx}`}
               >
-                <img src={src} alt={`Thumbnail ${idx + 1}`} className="h-14 w-14 object-cover" />
+                <img
+                  src={src}
+                  alt={`Thumbnail ${idx + 1}`}
+                  className="h-14 w-14 object-cover"
+                />
               </button>
             ))}
           </div>
@@ -287,7 +323,10 @@ function LightboxModal({
       </Button>
 
       {hasMultiple && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 text-white/80 text-sm z-[101]" data-testid="text-lightbox-counter">
+        <div
+          className="absolute top-4 left-1/2 -translate-x-1/2 text-white/80 text-sm z-[101]"
+          data-testid="text-lightbox-counter"
+        >
           {currentIndex + 1} / {images.length}
         </div>
       )}
@@ -304,7 +343,8 @@ function LightboxModal({
           alt={`${alt} ${currentIndex + 1}`}
           className="max-w-full max-h-full object-contain select-none transition-opacity duration-300"
           style={{
-            transform: touchStart !== null ? `translateX(${touchDelta}px)` : undefined,
+            transform:
+              touchStart !== null ? `translateX(${touchDelta}px)` : undefined,
             transition: touchStart !== null ? "none" : "transform 0.3s ease",
           }}
           draggable={false}
@@ -318,7 +358,10 @@ function LightboxModal({
             variant="ghost"
             size="icon"
             className="absolute left-2 top-1/2 -translate-y-1/2 text-white z-[101]"
-            onClick={(e) => { e.stopPropagation(); onPrev(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPrev();
+            }}
             data-testid="button-lightbox-prev"
           >
             <ChevronLeft className="h-6 w-6" />
@@ -327,7 +370,10 @@ function LightboxModal({
             variant="ghost"
             size="icon"
             className="absolute right-2 top-1/2 -translate-y-1/2 text-white z-[101]"
-            onClick={(e) => { e.stopPropagation(); onNext(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onNext();
+            }}
             data-testid="button-lightbox-next"
           >
             <ChevronRight className="h-6 w-6" />
@@ -340,13 +386,22 @@ function LightboxModal({
           {images.map((src, idx) => (
             <button
               key={idx}
-              onClick={(e) => { e.stopPropagation(); onGoTo(idx); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                onGoTo(idx);
+              }}
               className={`shrink-0 rounded overflow-hidden transition-all duration-200 border-2 ${
-                idx === currentIndex ? "border-white opacity-100" : "border-transparent opacity-50"
+                idx === currentIndex
+                  ? "border-white opacity-100"
+                  : "border-transparent opacity-50"
               }`}
               data-testid={`button-lightbox-thumb-${idx}`}
             >
-              <img src={src} alt={`Thumb ${idx + 1}`} className="h-12 w-12 object-cover" />
+              <img
+                src={src}
+                alt={`Thumb ${idx + 1}`}
+                className="h-12 w-12 object-cover"
+              />
             </button>
           ))}
         </div>
